@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChefHat, Chrome } from 'lucide-react';
+import { X, ChefHat, Chrome, AlertCircle } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { useState } from 'react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -9,13 +10,29 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const handleGoogleSignIn = async () => {
+    setError(null);
+    setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
+      // Force account selection to avoid transparent failures
+      provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
       onClose();
-    } catch (error) {
-      console.error("Auth error:", error);
+    } catch (err: any) {
+      console.error("Auth error:", err);
+      if (err.code === 'auth/popup-blocked') {
+        setError('Sign-in popup was blocked by your browser. Please allow popups for this site.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('This domain is not authorized for sign-in. Please contact the administrator.');
+      } else {
+        setError('Failed to sign in with Google. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,7 +52,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative bg-white w-full max-w-md rounded-[3rem] overflow-hidden shadow-2xl overflow-hidden"
+            className="relative bg-white w-full max-w-md rounded-[3rem] overflow-hidden shadow-2xl"
           >
             <div className="relative p-12 text-center">
               <button 
@@ -53,16 +70,24 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <h2 className="text-4xl font-serif font-black text-[#333] mb-4">Welcome Back</h2>
               <p className="text-gray-500 font-sans mb-10">Join our community of culinary creators and start sharing your flavors with the world.</p>
 
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 text-left">
+                  <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={18} />
+                  <p className="text-sm text-red-600 font-sans">{error}</p>
+                </div>
+              )}
+
               <div className="space-y-4">
                 <button 
                   onClick={handleGoogleSignIn}
-                  className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-100 py-4 rounded-2xl font-bold text-[#333] hover:border-[#d48c45] hover:bg-[#fdfaf6] transition-all group"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-100 py-4 rounded-2xl font-bold text-[#333] hover:border-[#d48c45] hover:bg-[#fdfaf6] transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
                   id="google-sign-in-btn"
                 >
                   <div className="bg-gray-100 p-1.5 rounded-lg group-hover:bg-white transition-colors">
-                    <Chrome size={20} className="text-[#333]" />
+                    <Chrome size={20} className={loading ? "animate-spin" : "text-[#333]"} />
                   </div>
-                  Continue with Google
+                  {loading ? 'Connecting...' : 'Continue with Google'}
                 </button>
               </div>
 

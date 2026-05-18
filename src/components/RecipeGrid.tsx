@@ -39,9 +39,12 @@ export function RecipeGrid({ onRecipeClick, searchQuery }: RecipeGridProps) {
 
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
-      const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          r.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'All' || r.category === selectedCategory;
+      const title = r?.title?.toLowerCase() || '';
+      const description = r?.description?.toLowerCase() || '';
+      const query = searchQuery.toLowerCase();
+      
+      const matchesSearch = title.includes(query) || description.includes(query);
+      const matchesCategory = selectedCategory === 'All' || r?.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }, [recipes, searchQuery, selectedCategory]);

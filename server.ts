@@ -37,7 +37,7 @@ async function startServer() {
 
       const prompt = `Suggest a creative and delicious recipe that uses these ingredients: ${ingredients.join(", ")}. Provide the recipe title, a brief description, a list of ingredients (including common pantry staples), and step-by-step instructions. Return the response in JSON format with keys: title, description, ingredients, instructions.`;
 
-      const response = await ai.models.generateContent({
+      const result = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
@@ -45,7 +45,7 @@ async function startServer() {
         }
       });
       
-      const text = response.text || "";
+      const text = result.text || "";
       res.json(JSON.parse(text));
     } catch (error) {
       console.error("Gemini Error:", error);
