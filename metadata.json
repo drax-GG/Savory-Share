@@ -1,0 +1,8 @@
+{
+  "name": "SavoryShare",
+  "description": "A modern food recipe sharing platform where users can upload recipes, search by ingredients, and save their favorites.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
