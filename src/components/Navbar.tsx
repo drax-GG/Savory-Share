@@ -8,10 +8,11 @@ interface NavbarProps {
   user: User | null;
   onViewChange: (view: 'home' | 'recipe' | 'upload' | 'profile') => void;
   onAuthClick: () => void;
+  onBrowseClick?: () => void;
   currentView: string;
 }
 
-export function Navbar({ user, onViewChange, onAuthClick, currentView }: NavbarProps) {
+export function Navbar({ user, onViewChange, onAuthClick, onBrowseClick, currentView }: NavbarProps) {
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,7 +29,13 @@ export function Navbar({ user, onViewChange, onAuthClick, currentView }: NavbarP
 
           <div className="hidden md:flex items-center gap-8 font-sans font-medium text-gray-600">
             <button 
-              onClick={() => onViewChange('home')}
+              onClick={() => {
+                if (currentView === 'home' && onBrowseClick) {
+                  onBrowseClick();
+                } else {
+                  onViewChange('home');
+                }
+              }}
               className={cn("hover:text-[#d48c45] transition-colors", currentView === 'home' && "text-[#d48c45]")}
             >
               Discover

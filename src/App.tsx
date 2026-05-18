@@ -155,6 +155,7 @@ export default function App() {
         user={user} 
         onViewChange={setView} 
         onAuthClick={() => setIsAuthModalOpen(true)}
+        onBrowseClick={handleExplore}
         currentView={view}
       />
 

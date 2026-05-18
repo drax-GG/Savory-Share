@@ -15,11 +15,13 @@ interface RecipeGridProps {
 export function RecipeGrid({ onRecipeClick, searchQuery }: RecipeGridProps) {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   const categories = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Vegan', 'Keto'];
 
   useEffect(() => {
+    setError(null);
     const q = query(collection(db, 'recipes'), orderBy('createdAt', 'desc'), limit(50));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -29,8 +31,9 @@ export function RecipeGrid({ onRecipeClick, searchQuery }: RecipeGridProps) {
       })) as Recipe[];
       setRecipes(docs);
       setLoading(false);
-    }, (error) => {
-      console.error("Error fetching recipes:", error);
+    }, (err) => {
+      console.error("Error fetching recipes:", err);
+      setError("We encountered an issue loading the recipes. This might be due to a missing database index or permission setting.");
       setLoading(false);
     });
 
@@ -54,6 +57,21 @@ export function RecipeGrid({ onRecipeClick, searchQuery }: RecipeGridProps) {
       <div className="flex flex-col items-center justify-center py-20">
         <Loader2 className="w-8 h-8 animate-spin text-[#d48c45] mb-4" />
         <p className="font-serif italic text-gray-500">Curating the finest recipes for you...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20 bg-red-50 rounded-[2rem] border border-red-100 px-6">
+        <p className="text-red-600 font-sans mb-2 font-bold">Oops! Something went wrong.</p>
+        <p className="text-red-500 font-sans text-sm max-w-md mx-auto">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-6 px-6 py-2 bg-red-600 text-white rounded-full text-sm font-bold"
+        >
+          Retry
+        </button>
       </div>
     );
   }
