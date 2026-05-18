@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, Loader2 } from 'lucide-react';
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | any>(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'home' | 'recipe' | 'upload' | 'profile'>('home');
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
@@ -22,6 +22,12 @@ export default function App() {
   const discoveryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Check localStorage for persisted session
+    const savedUser = localStorage.getItem('savory_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         // --- SEEDING LOGIC ---
@@ -108,29 +114,26 @@ export default function App() {
         }
         // --- END SEEDING LOGIC ---
 
-        // Ensure user document exists in Firestore
-        const userRef = doc(db, 'users', firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            userId: firebaseUser.uid,
-            displayName: firebaseUser.displayName || 'Guest User',
-            photoURL: firebaseUser.photoURL || '',
-            bio: '',
-            favoriteRecipeIds: [],
-            createdAt: serverTimestamp()
-          });
-        }
         setUser(firebaseUser);
-      } else {
-        setUser(null);
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
+
+  const handleManualLogin = (userData: any) => {
+    setUser(userData);
+    localStorage.setItem('savory_user', JSON.stringify(userData));
+  };
+
+  const handleLogout = () => {
+    auth.signOut();
+    localStorage.removeItem('savory_user');
+    setUser(null);
+    setView('home');
+  };
+
 
   const handleRecipeClick = (id: string) => {
     setSelectedRecipeId(id);
@@ -155,6 +158,7 @@ export default function App() {
         user={user} 
         onViewChange={setView} 
         onAuthClick={() => setIsAuthModalOpen(true)}
+        onLogout={handleLogout}
         onBrowseClick={handleExplore}
         currentView={view}
       />
@@ -243,6 +247,7 @@ export default function App() {
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
+        onLogin={handleManualLogin}
       />
 
       <footer className="bg-white border-t border-gray-100 py-12 mt-20">

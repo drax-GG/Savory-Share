@@ -1,39 +1,40 @@
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChefHat, Chrome, AlertCircle } from 'lucide-react';
-import { auth } from '../lib/firebase';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { useState } from 'react';
+import { X, ChefHat, AlertCircle } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onLogin: (userData: any) => void;
 }
 
-export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleGoogleSignIn = async () => {
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
     setError(null);
     setLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      // Force account selection to avoid transparent failures
-      provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithPopup(auth, provider);
-      onClose();
-    } catch (err: any) {
-      console.error("Auth error:", err);
-      if (err.code === 'auth/popup-blocked') {
-        setError('Sign-in popup was blocked by your browser. Please allow popups for this site.');
-      } else if (err.code === 'auth/unauthorized-domain') {
-        setError('This domain is not authorized for sign-in. Please add "savory-share.netlify.app" to your Authorized Domains in the Firebase Console.');
+
+    // Using setTimeout to simulate an async check
+    setTimeout(() => {
+      if (username === 'admin' && password === 'admin123') {
+        const mockUser = {
+          uid: 'admin-id',
+          email: 'admin@savoryshare.com',
+          displayName: 'Admin Chef',
+          photoURL: null
+        };
+        onLogin(mockUser);
+        onClose();
       } else {
-        setError('Failed to sign in with Google. Please try again.');
+        setError('Invalid username or password. Please use admin / admin123');
       }
-    } finally {
       setLoading(false);
-    }
+    }, 600);
   };
 
   return (
@@ -68,7 +69,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </div>
 
               <h2 className="text-4xl font-serif font-black text-[#333] mb-4">Welcome Back</h2>
-              <p className="text-gray-500 font-sans mb-10">Join our community of culinary creators and start sharing your flavors with the world.</p>
+              <p className="text-gray-500 font-sans mb-10">Sign in with your admin credentials to start sharing your flavors.</p>
 
               {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 text-left">
@@ -77,22 +78,41 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 </div>
               )}
 
-              <div className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-4 text-left">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Username</label>
+                  <input 
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="admin"
+                    className="w-full bg-gray-50 border-2 border-transparent px-6 py-4 rounded-2xl font-sans focus:bg-white focus:border-[#d48c45] transition-all outline-none"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Password</label>
+                  <input 
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="admin123"
+                    className="w-full bg-gray-50 border-2 border-transparent px-6 py-4 rounded-2xl font-sans focus:bg-white focus:border-[#d48c45] transition-all outline-none"
+                    required
+                  />
+                </div>
+
                 <button 
-                  onClick={handleGoogleSignIn}
+                  type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-100 py-4 rounded-2xl font-bold text-[#333] hover:border-[#d48c45] hover:bg-[#fdfaf6] transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-                  id="google-sign-in-btn"
+                  className="w-full flex items-center justify-center gap-3 bg-[#d48c45] text-white py-4 rounded-2xl font-bold hover:bg-[#c37b34] transition-all shadow-xl shadow-[#d48c45]/20 disabled:opacity-50 mt-4"
                 >
-                  <div className="bg-gray-100 p-1.5 rounded-lg group-hover:bg-white transition-colors">
-                    <Chrome size={20} className={loading ? "animate-spin" : "text-[#333]"} />
-                  </div>
-                  {loading ? 'Connecting...' : 'Continue with Google'}
+                  {loading ? 'Verifying...' : 'Sign In'}
                 </button>
-              </div>
+              </form>
 
               <p className="mt-10 text-xs text-gray-400 leading-relaxed">
-                By continuing, you agree to our <span className="underline cursor-pointer">Terms of Service</span> and <span className="underline cursor-pointer">Privacy Policy</span>.
+                Use <span className="font-bold">admin</span> / <span className="font-bold">admin123</span> to login.
               </p>
             </div>
             

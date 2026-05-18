@@ -5,14 +5,15 @@ import { signOut, User } from 'firebase/auth';
 import { cn } from '../lib/utils';
 
 interface NavbarProps {
-  user: User | null;
+  user: User | any;
   onViewChange: (view: 'home' | 'recipe' | 'upload' | 'profile') => void;
   onAuthClick: () => void;
+  onLogout: () => void;
   onBrowseClick?: () => void;
   currentView: string;
 }
 
-export function Navbar({ user, onViewChange, onAuthClick, onBrowseClick, currentView }: NavbarProps) {
+export function Navbar({ user, onViewChange, onAuthClick, onLogout, onBrowseClick, currentView }: NavbarProps) {
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,12 +62,14 @@ export function Navbar({ user, onViewChange, onAuthClick, onBrowseClick, current
                   {user.photoURL ? (
                     <img src={user.photoURL} alt={user.displayName || ''} className="w-8 h-8 rounded-full object-cover" />
                   ) : (
-                    <UserIcon size={20} className="text-[#333]" />
+                    <div className="w-8 h-8 rounded-full bg-[#fdfaf6] flex items-center justify-center border border-gray-100">
+                      <UserIcon size={18} className="text-[#d48c45]" />
+                    </div>
                   )}
                   <span className="hidden sm:block text-sm font-medium">{user.displayName?.split(' ')[0]}</span>
                 </button>
                 <button 
-                  onClick={() => signOut(auth)}
+                  onClick={onLogout}
                   className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                   title="Sign Out"
                 >
