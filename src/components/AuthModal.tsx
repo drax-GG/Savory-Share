@@ -27,7 +27,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       if (err.code === 'auth/popup-blocked') {
         setError('Sign-in popup was blocked by your browser. Please allow popups for this site.');
       } else if (err.code === 'auth/unauthorized-domain') {
-        setError('This domain is not authorized for sign-in. Please contact the administrator.');
+        setError('This domain is not authorized for sign-in. Please add "savory-share.netlify.app" to your Authorized Domains in the Firebase Console.');
       } else {
         setError('Failed to sign in with Google. Please try again.');
       }

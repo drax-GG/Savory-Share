@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { ArrowRight, Star, Clock, Utensils } from 'lucide-react';
+import heroImage from '../assets/images/savory_share_hero_1779092662572.png';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -77,7 +78,7 @@ export function Hero({ onExploreClick }: HeroProps) {
           >
             <div className="absolute -inset-4 bg-[#d48c45]/10 rounded-[3rem] blur-3xl transform -rotate-6"></div>
             <img 
-              src="/src/assets/images/savory_share_hero_1779092662572.png" 
+              src={heroImage} 
               alt="Mediterranean Feast" 
               className="relative w-full h-auto rounded-[2.5rem] shadow-2xl object-cover aspect-[4/5]"
               referrerPolicy="no-referrer"
